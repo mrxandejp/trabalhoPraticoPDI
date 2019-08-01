@@ -78,6 +78,20 @@ def brightness_level(photo, brightness = 1):
       
   return shinebright
 
+
+def brightness_level_ch(photo, brightness = 2, channel = 0):
+  shape = photo.shape
+  shinebright = np.zeros(photo.shape, dtype = int)
+  for i in range(0,shape[0]): 
+    for j in range(0,shape[1]):
+        shinebright[i,j,0] = photo[i,j,0]
+        shinebright[i,j,1] = photo[i,j,1]
+        shinebright[i,j,2] = photo[i,j,2]
+        shinebright[i,j,channel] = min(255, brightness * photo[i,j,channel])
+    
+  return shinebright
+
+
 def mask_from_file(file_name):
     file = open(file_name,"r") # abre o arquivo input.txt em modo de leitura (read)
     if file.mode == 'r':
@@ -104,6 +118,18 @@ def negative(photo):
   
     return negative
 
+def negative_ch(photo,channel):
+    shape = photo.shape
+    negative = np.zeros(photo.shape, dtype = int)
+    for i in range(0,shape[0]): 
+        for j in range(0,shape[1]):
+            negative[i,j,0] = photo[i,j,0]
+            negative[i,j,1] = photo[i,j,1]
+            negative[i,j,2] = photo[i,j,2]
+            negative[i,j,channel] = 255-photo[i,j,channel]
+  
+  
+    return negative
 
 def rebater(mask):
     mask=np.flipud(np.fliplr(mask))
@@ -156,7 +182,7 @@ MAIN
 
 m, n, mask = mask_from_file("input.txt")
 
-img_original = image.imread('./imagens_trab/lena256color.jpg')
+img_original = image.imread('./imagens_trab/2817540617.jpg')
 
 img = img_original.copy()
 img
@@ -199,6 +225,19 @@ plt.imshow(img_brilhosa3)
 plt.subplot(1, 4, 4)
 plt.imshow(img_brilhosa5)
 plt.show()
+
+'''
+TESTE PARA BRILHO EM CANAL ESPECIFICO
+'''
+img_brilhosa_red = brightness_level_ch(img, 2, 2)
+plt.imshow(img_brilhosa_red)
+
+'''
+TESTE PARA NEGATIVO EM CANAL ESPECIFICO
+'''
+img_negativa = negative_ch(img,2)
+plt.imshow(img_negativa)
+
 
 '''
 TESTE CONVOLUÇÃO USANDO MÉDIA
