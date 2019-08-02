@@ -29,7 +29,8 @@ def save_image(opcao, img, image_name):
     opcoes = {'1': '_original.png', '2': '_yiq.png', 'r' : '_red.png', 
               'g': '_green.png', 'b': '_blue.png', 'n':'_negativo.png', 'nr': '_negativoRed.png',
               'ng': '_negativoGreen.png', 'nb': '_negativoBlue.png',
-              'b' : '_brilho.png','br' : '_brilhoRed.png', 'bg' : '_brilhoGreen.png', 'bb' : '_brilhoBlue.png'}
+              'bl' : '_brilho.png','br' : '_brilhoRed.png', 'bg' : '_brilhoGreen.png', 'bb' : '_brilhoBlue.png',
+              'c':'_convolucao.png', 'm':'_conv_media.png', 'sx':'_conv_sobelX.png', 'sy':'_conv_sobelY.png', '7':'_mediana.png'}
     if save == 'y':
         plt.imsave( save_path + image_name + opcoes[opcao], img)
         return print("Imagem salva com sucesso!")
@@ -64,12 +65,12 @@ def menu_negativo(img, image_name):
 
 def menu_brightness_level(img, image_name):
     print("\nDigite opcao de brilho: ")
-    print("b - Brilho em todos os canais")
+    print("bl - Brilho em todos os canais")
     print("br - brilho em canal específico Red")
     print("bg - brilho em canal específico Green")
     print("bb - brilho em canal específico Blue")
     op = input("Opção: ")
-    if op == 'b':
+    if op == 'bl':
         level = input("Digite o nivel de brilho (ex: 2): ")
         img_brilhosa = brightness_level(img, float(level))
         plt.imshow(img_brilhosa)
@@ -79,6 +80,41 @@ def menu_brightness_level(img, image_name):
         img_brilhosa_canal = brightness_level_ch(img, float(level), op)
         plt.imshow(img_brilhosa_canal)
         save_image(op, img_brilhosa_canal, image_name +'_'+ level)
+        
+def menu_convolution(img, image_name):
+    print("\nDigite opcao de convolução: ")
+    print("c - Inserir nome do arquivo texto com a máscara")
+    print("m - Convolução usando a média (3x3)")
+    print("sx - Convolução usando sobel X")
+    print("sy - Convolução usando sobel Y")
+    op = input("Opção: ")
+    if op == 'c':
+        mask_file_name = input("Digite o nome do arquivo que contém a máscara (ex: input.txt): ")
+        m, n, mask = mask_from_file(mask_file_name)
+        conv_mask = convolution(img,m,n,mask)
+        plt.imshow(conv_mask)
+        save_image(op, conv_mask, image_name)
+    elif op == 'm':
+        media = [[1/9,1/9,1/9],
+                [1/9,1/9,1/9],
+                [1/9,1/9,1/9]]
+        conv_media=convolution(img,3,3,media)        
+        plt.imshow(conv_media)
+        save_image(op, conv_media, image_name)
+    elif op == 'sx':
+        sobel_x = [[-1,0,1],
+                   [-2,0,2],
+                   [-1,0,1]]
+        conv_sobel_x=convolution(img,3,3,sobel_x)        
+        plt.imshow(conv_sobel_x)
+        save_image(op, conv_sobel_x, image_name)
+    elif op == 'sy':
+        sobel_y = [[1,2,1],
+                   [0,0,0],
+                   [-1,-2,-1]]
+        conv_sobel_y=convolution(img,3,3,sobel_y)
+        plt.imshow(conv_sobel_y)
+        save_image(op, conv_sobel_y, image_name)
 
 def display_rgb(photo, rgb, image_name):
   display_r = np.zeros(photo.shape)
@@ -255,8 +291,6 @@ MAIN
 '''
 
 while True:
-    m, n, mask = mask_from_file("input.txt")
-    
     print("\nDigite a opcao desejada: ")
     print("1 - Inserir a imagem (Caso não tenha inserido, ou deseja mudar a imagem)")
     print("2 - Conversão RGB-YIQ-RGB ")
@@ -288,131 +322,10 @@ while True:
         menu_negativo(img, image_name)
     elif opcao == '5':
         menu_brightness_level(img, image_name)
-
-m, n, mask = mask_from_file("input.txt")
-
-img_original = image.imread('./imagens_trab/CNN1.png')
-
-img = img_original.copy()
-img
-
-img = img*255
-
-# Para poder editar a imagem
-img.flags 
-plt.imshow(img)
-
-img.shape
-
-
-'''
-Exibição de bandas individuais (R,G e B) em tons de R, G e B 
-'''
-display_rgb(img, 'all')
-
-'''
-Conversão RGB-YIQ-RGB
-'''
-img_yiq = from_rgb_to_yiq(img)
-
-plt.imshow(img_yiq)
-
-img_rgb = from_yiq_to_rgb(img_yiq)
-
-plt.imshow(img_rgb)
-
-'''
-Negativo
-'''
-negativo=negative(img)
-plt.imshow(negativo)
-save_image('n', negativo, 'teste')
-
-'''
-Negativo em canal específico
-'''
-#Canal RED
-img_negativa_R = negative_ch(img,0) 
-plt.imshow(img_negativa_R)
-#Canal GREEN
-img_negativa_G = negative_ch(img,1) 
-plt.imshow(img_negativa_G)
-#Canal BLUE 
-img_negativa_B = negative_ch(img,2) 
-plt.imshow(img_negativa_B)
-
-'''
-Controle de brilho multiplicativo
-'''
-img_brilhosa2 = brightness_level(img, 2)
-img_brilhosa3 = brightness_level(img, 3)
-img_brilhosa5 = brightness_level(img, 5)
-
-plt.figure(figsize=(20,10))
-
-plt.subplot(1, 4, 1)
-plt.imshow(img)
-
-plt.subplot(1, 4, 2)
-plt.imshow(img_brilhosa2)
-
-plt.subplot(1, 4, 3)
-plt.imshow(img_brilhosa3)
-
-plt.subplot(1, 4, 4)
-plt.imshow(img_brilhosa5)
-plt.show()
-
-'''
-Controle de brilho multiplicativo em canal específico 
-'''
-img_brilhosa_red = brightness_level_ch(img, 2, 2)
-plt.imshow(img_brilhosa_red)
-
-'''
-Convolução usando a média
-'''
-media = [[1/9,1/9,1/9],
-        [1/9,1/9,1/9],
-        [1/9,1/9,1/9]]
-
-conv_media=convolution(img,m,n,media)
-
-plt.imshow(conv_media)
-
-'''
-Convolução usando sobel X
-'''
-sobel_x = [[-1,0,1],
-        [-2,0,2],
-        [-1,0,1]]
-
-conv_sobel_x=convolution(img,m,n,sobel_x)
-
-plt.imshow(conv_sobel_x)
-
-'''
-Convolução usando sobel Y
-'''
-sobel_y = [[1,2,1],
-        [0,0,0],
-        [-1,-2,-1]]
-
-conv_sobel_y=convolution(img,m,n,sobel_y)
-
-plt.imshow(conv_sobel_y)
-
-'''
-Filtro da mediana 
-'''
-conv_mediana = convolution_median(img,m,n)
-
-plt.imshow(conv_mediana)
-
-'''
-Convolução com mascara lida por arquivo
-'''
-conv_mask = convolution(img,m,n,mask)
-plt.imshow(conv_mask)
-
-plt.imshow(img)
+    elif opcao == '6':
+        menu_convolution(img, image_name)
+    elif opcao == '7':
+        [m, n] = input("Digite o valor de m e n respectivamente (ex: 3 3): ").split(' ')
+        conv_mediana = convolution_median(img,int(m),int(n))
+        plt.imshow(conv_mediana)
+        save_image(opcao, conv_mediana, image_name)
