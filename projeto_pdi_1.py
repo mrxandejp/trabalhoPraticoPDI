@@ -204,15 +204,17 @@ while True:
     print("4 - Controle de brilho multiplicativo")
     print("5 - Convolução m x n")
     print("6 - Filtro mediana m x n")
+    print("0 - Sair")
     opcao = input("Opção: ")    
-    if opcao == 'p':
+    if opcao == '0':
+        plt.imsave('teste.png', img)
         plt.imshow(img)
         break
 
 
 m, n, mask = mask_from_file("input.txt")
 
-img_original = image.imread('./imagens_trab/CNN1.png')
+img_original = image.imread('./imagens_trab/lena256color.jpg')
 
 
 
