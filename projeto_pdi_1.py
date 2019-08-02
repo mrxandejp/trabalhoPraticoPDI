@@ -23,27 +23,72 @@ os.chdir(path)
 '''
 FUNÇÕES
 '''
-def display_rgb(photo, rgb):
+def save_image(opcao, img, image_name):
+    save = input("Deseja salvar a imagem? (y/n): ")  
+    save_path = './imagens_salvas/'
+    opcoes = {'1': '_original.png', '2': '_yiq.png', 'r' : '_red.png', 
+              'g': '_green.png', 'b': '_blue.png', 'n':'_negativo', 'nr': '_negativoRed',
+              'ng': '_negativoGreen', 'nb': '_negativoBlue'}
+    if save == 'y':
+        plt.imsave( save_path + image_name + opcoes[opcao], img)
+        return print("Imagem salva com sucesso!")
+    elif save == 'n':
+        return print("Sem salvar!")
+
+def menu_banda_rgb(img, image_name):
+    print("\nDigite a opcao para qual banda deseja visualizar: ")
+    print("r - Red")
+    print("g - Green")
+    print("b - Blue")
+    print("a - Todos")
+    op = input("Opção: ")
+    display_rgb(img, op, image_name)
+    return print("Menu banda rgb fechado!")
+
+def menu_negativo(img, image_name):
+    print("\nDigite opcao de negativo: ")
+    print("n - Negativo em todos os canais")
+    print("nr - negativo em canal específico Red")
+    print("ng - negativo em canal específico Green")
+    print("nb - negativo em canal específico Blue")
+    op = input("Opção: ")
+    if op == 'n':
+        negativo=negative(img)
+        plt.imshow(negativo)
+        save_image(op, negativo, image_name)
+    else:
+        img_negativa = negative_ch(img,op) 
+        plt.imshow(img_negativa)
+        save_image(op, negativo, image_name)
+
+
+def display_rgb(photo, rgb, image_name):
   display_r = photo[:,:,0]
   display_g = photo[:,:,1]
   display_b = photo[:,:,2]
   if rgb == 'r':
     plt.imshow(display_r, 'Reds')
+    save_image(rgb, display_r, image_name)
   elif rgb == 'g':
     plt.imshow(display_g, 'Greens')
+    save_image(rgb, display_g, image_name)
   elif rgb == 'b':
-    plt.imshow(display_b, 'Blues')   
+    plt.imshow(display_b, 'Blues')
+    save_image(rgb, display_b, image_name)
   else:
     plt.figure(figsize=(20,10))
 
     plt.subplot(1, 3, 1)
     plt.imshow(display_r, 'Reds')
-
+    save_image('r', display_r, image_name)
+    
     plt.subplot(1, 3, 2)
     plt.imshow(display_g, 'Greens')
+    save_image('g', display_g, image_name)
 
     plt.subplot(1, 3, 3)
     plt.imshow(display_b, 'Blues')
+    save_image('b', display_b, image_name)
 
 def from_rgb_to_yiq(photo):
   shape = photo.shape
@@ -126,6 +171,7 @@ def negative(photo):
     return negative
 
 def negative_ch(photo,channel):
+    negative_ops = {'nr': 0, 'ng':1, 'nb':2}
     shape = photo.shape
     negative = np.zeros(photo.shape, dtype = int)
     for i in range(0,shape[0]): 
@@ -133,7 +179,7 @@ def negative_ch(photo,channel):
             negative[i,j,0] = photo[i,j,0]
             negative[i,j,1] = photo[i,j,1]
             negative[i,j,2] = photo[i,j,2]
-            negative[i,j,channel] = 255-photo[i,j,channel]
+            negative[i,j,negative_ops[channel]] = 255-photo[i,j,negative_ops[channel]]
   
   
     return negative
@@ -188,41 +234,49 @@ MAIN
 '''
 
 while True:
-    [image_name, ext] = input("Digite o nome da imagem (Ex: lena256color.jpg): ").split('.')
     m, n, mask = mask_from_file("input.txt")
     
-    img_original = image.imread('./imagens_trab/' + image_name +'.'+ ext)
-    img = img_original.copy()
-    
-    if ext == 'png':
-        img = img*255
-    
     print("\nDigite a opcao desejada: ")
-    print("1 - Conversão RGB-YIQ-RGB ")
-    print("2 - Exibir de bandas individuais RGB")
-    print("3 - Negativo")
-    print("4 - Controle de brilho multiplicativo")
-    print("5 - Convolução m x n")
-    print("6 - Filtro mediana m x n")
+    print("1 - Inserir a imagem (Caso não tenha inserido, ou deseja mudar a imagem)")
+    print("2 - Conversão RGB-YIQ-RGB ")
+    print("3 - Exibir de bandas individuais RGB")
+    print("4 - Negativo")
+    print("5 - Controle de brilho multiplicativo")
+    print("6 - Convolução m x n")
+    print("7 - Filtro mediana m x n")
     print("0 - Sair")
     opcao = input("Opção: ")    
     if opcao == '0':
-        plt.imsave('teste.png', img)
-        plt.imshow(img)
+        print("\nEncerrando o programa...")
         break
+    elif opcao == '1':
+        [image_name, ext] = input("Digite o nome da imagem (Ex: lena256color.jpg): ").split('.')
+        img_original = image.imread('./imagens_trab/' + image_name +'.'+ ext)
+        img = img_original.copy()
+        if ext == 'png':
+            img = img*255
+    elif opcao == '2':
+        img_yiq = from_rgb_to_yiq(img)
+        plt.imshow(img_yiq)
+        save_image(opcao, img_yiq, image_name)
+        img_rgb = from_yiq_to_rgb(img_yiq)
+        plt.imshow(img_rgb)
+    elif opcao == '3':
+        menu_banda_rgb(img, image_name)
+    elif opcao == '4':
+        menu_negativo(img, image_name)
 
 
 m, n, mask = mask_from_file("input.txt")
 
 img_original = image.imread('./imagens_trab/lena256color.jpg')
 
-
-
 img = img_original.copy()
 img
 
 img = img*255
 
+menu_negativo(img, image_name)
 # Para poder editar a imagem
 img.flags 
 plt.imshow(img)
