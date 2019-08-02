@@ -27,8 +27,9 @@ def save_image(opcao, img, image_name):
     save = input("Deseja salvar a imagem? (y/n): ")  
     save_path = './imagens_salvas/'
     opcoes = {'1': '_original.png', '2': '_yiq.png', 'r' : '_red.png', 
-              'g': '_green.png', 'b': '_blue.png', 'n':'_negativo', 'nr': '_negativoRed',
-              'ng': '_negativoGreen', 'nb': '_negativoBlue'}
+              'g': '_green.png', 'b': '_blue.png', 'n':'_negativo.png', 'nr': '_negativoRed.png',
+              'ng': '_negativoGreen.png', 'nb': '_negativoBlue.png',
+              'b' : '_brilho.png','br' : '_brilhoRed.png', 'bg' : '_brilhoGreen.png', 'bb' : '_brilhoBlue.png'}
     if save == 'y':
         plt.imsave( save_path + image_name + opcoes[opcao], img)
         return print("Imagem salva com sucesso!")
@@ -59,13 +60,33 @@ def menu_negativo(img, image_name):
     else:
         img_negativa = negative_ch(img,op) 
         plt.imshow(img_negativa)
-        save_image(op, negativo, image_name)
+        save_image(op, img_negativa, image_name)
 
+def menu_brightness_level(img, image_name):
+    print("\nDigite opcao de brilho: ")
+    print("b - Brilho em todos os canais")
+    print("br - brilho em canal específico Red")
+    print("bg - brilho em canal específico Green")
+    print("bb - brilho em canal específico Blue")
+    op = input("Opção: ")
+    if op == 'b':
+        level = input("Digite o nivel de brilho (ex: 2): ")
+        img_brilhosa = brightness_level(img, float(level))
+        plt.imshow(img_brilhosa)
+        save_image(op, img_brilhosa, image_name +'_'+ level)
+    else:
+        level = input("Digite o nivel de brilho (ex: 2): ")
+        img_brilhosa_canal = brightness_level_ch(img, float(level), op)
+        plt.imshow(img_brilhosa_canal)
+        save_image(op, img_brilhosa_canal, image_name +'_'+ level)
 
 def display_rgb(photo, rgb, image_name):
-  display_r = photo[:,:,0]
-  display_g = photo[:,:,1]
-  display_b = photo[:,:,2]
+  display_r = np.zeros(photo.shape)
+  display_g = np.zeros(photo.shape)
+  display_b = np.zeros(photo.shape)
+  display_r[:,:,0] = photo[:,:,0]
+  display_g[:,:,1] = photo[:,:,1]
+  display_b[:,:,2] = photo[:,:,2]
   if rgb == 'r':
     plt.imshow(display_r, 'Reds')
     save_image(rgb, display_r, image_name)
@@ -119,7 +140,7 @@ def from_yiq_to_rgb(photo):
     return rgb
 
 
-def brightness_level(photo, brightness = 1):
+def brightness_level(photo, brightness):
   shape = photo.shape
   shinebright = np.zeros(photo.shape, dtype = int)
   for i in range(0,shape[0]): 
@@ -131,7 +152,8 @@ def brightness_level(photo, brightness = 1):
   return shinebright
 
 
-def brightness_level_ch(photo, brightness = 2, channel = 0):
+def brightness_level_ch(photo, brightness, channel):
+  brightness_ops = {'br': 0, 'bg':1, 'bb':2}  
   shape = photo.shape
   shinebright = np.zeros(photo.shape, dtype = int)
   for i in range(0,shape[0]): 
@@ -139,7 +161,7 @@ def brightness_level_ch(photo, brightness = 2, channel = 0):
         shinebright[i,j,0] = photo[i,j,0]
         shinebright[i,j,1] = photo[i,j,1]
         shinebright[i,j,2] = photo[i,j,2]
-        shinebright[i,j,channel] = min(255, brightness * photo[i,j,channel])
+        shinebright[i,j,brightness_ops[channel]] = min(255, brightness * photo[i,j,brightness_ops[channel]])
     
   return shinebright
 
@@ -180,8 +202,7 @@ def negative_ch(photo,channel):
             negative[i,j,1] = photo[i,j,1]
             negative[i,j,2] = photo[i,j,2]
             negative[i,j,negative_ops[channel]] = 255-photo[i,j,negative_ops[channel]]
-  
-  
+            
     return negative
 
 def rebater(mask):
@@ -265,18 +286,18 @@ while True:
         menu_banda_rgb(img, image_name)
     elif opcao == '4':
         menu_negativo(img, image_name)
-
+    elif opcao == '5':
+        menu_brightness_level(img, image_name)
 
 m, n, mask = mask_from_file("input.txt")
 
-img_original = image.imread('./imagens_trab/lena256color.jpg')
+img_original = image.imread('./imagens_trab/CNN1.png')
 
 img = img_original.copy()
 img
 
 img = img*255
 
-menu_negativo(img, image_name)
 # Para poder editar a imagem
 img.flags 
 plt.imshow(img)
@@ -305,6 +326,7 @@ Negativo
 '''
 negativo=negative(img)
 plt.imshow(negativo)
+save_image('n', negativo, 'teste')
 
 '''
 Negativo em canal específico
