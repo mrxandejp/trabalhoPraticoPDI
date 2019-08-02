@@ -187,9 +187,32 @@ def convolution_median(photo,m,n):
 MAIN
 '''
 
+while True:
+    [image_name, ext] = input("Digite o nome da imagem (Ex: lena256color.jpg): ").split('.')
+    m, n, mask = mask_from_file("input.txt")
+    
+    img_original = image.imread('./imagens_trab/' + image_name +'.'+ ext)
+    img = img_original.copy()
+    
+    if ext == 'png':
+        img = img*255
+    
+    print("\nDigite a opcao desejada: ")
+    print("1 - Conversão RGB-YIQ-RGB ")
+    print("2 - Exibir de bandas individuais RGB")
+    print("3 - Negativo")
+    print("4 - Controle de brilho multiplicativo")
+    print("5 - Convolução m x n")
+    print("6 - Filtro mediana m x n")
+    opcao = input("Opção: ")    
+    if opcao == 'p':
+        plt.imshow(img)
+        break
+
+
 m, n, mask = mask_from_file("input.txt")
 
-img_original = image.imread('./imagens_trab/imagem.png')
+img_original = image.imread('./imagens_trab/CNN1.png')
 
 
 
@@ -198,16 +221,21 @@ img
 
 img = img*255
 
-
-
 # Para poder editar a imagem
 img.flags 
 plt.imshow(img)
 
 img.shape
 
+
+'''
+Exibição de bandas individuais (R,G e B) em tons de R, G e B 
+'''
 display_rgb(img, 'all')
 
+'''
+Conversão RGB-YIQ-RGB
+'''
 img_yiq = from_rgb_to_yiq(img)
 
 plt.imshow(img_yiq)
@@ -216,10 +244,28 @@ img_rgb = from_yiq_to_rgb(img_yiq)
 
 plt.imshow(img_rgb)
 
+'''
+Negativo
+'''
 negativo=negative(img)
-
 plt.imshow(negativo)
 
+'''
+Negativo em canal específico
+'''
+#Canal RED
+img_negativa_R = negative_ch(img,0) 
+plt.imshow(img_negativa_R)
+#Canal GREEN
+img_negativa_G = negative_ch(img,1) 
+plt.imshow(img_negativa_G)
+#Canal BLUE 
+img_negativa_B = negative_ch(img,2) 
+plt.imshow(img_negativa_B)
+
+'''
+Controle de brilho multiplicativo
+'''
 img_brilhosa2 = brightness_level(img, 2)
 img_brilhosa3 = brightness_level(img, 3)
 img_brilhosa5 = brightness_level(img, 5)
@@ -240,20 +286,13 @@ plt.imshow(img_brilhosa5)
 plt.show()
 
 '''
-TESTE PARA BRILHO EM CANAL ESPECIFICO
+Controle de brilho multiplicativo em canal específico 
 '''
 img_brilhosa_red = brightness_level_ch(img, 2, 2)
 plt.imshow(img_brilhosa_red)
 
 '''
-TESTE PARA NEGATIVO EM CANAL ESPECIFICO
-'''
-img_negativa = negative_ch(img,2)
-plt.imshow(img_negativa)
-
-
-'''
-TESTE CONVOLUÇÃO USANDO MÉDIA
+Convolução usando a média
 '''
 media = [[1/9,1/9,1/9],
         [1/9,1/9,1/9],
@@ -264,7 +303,7 @@ conv_media=convolution(img,m,n,media)
 plt.imshow(conv_media)
 
 '''
-TESTE CONVOLUÇÃO USANDO SOBEL X
+Convolução usando sobel X
 '''
 sobel_x = [[-1,0,1],
         [-2,0,2],
@@ -275,7 +314,7 @@ conv_sobel_x=convolution(img,m,n,sobel_x)
 plt.imshow(conv_sobel_x)
 
 '''
-TESTE CONVOLUÇÃO USANDO SOBEL Y
+Convolução usando sobel Y
 '''
 sobel_y = [[1,2,1],
         [0,0,0],
@@ -286,10 +325,16 @@ conv_sobel_y=convolution(img,m,n,sobel_y)
 plt.imshow(conv_sobel_y)
 
 '''
-TESTE MEDIANA
+Filtro da mediana 
 '''
 conv_mediana = convolution_median(img,m,n)
 
 plt.imshow(conv_mediana)
 
-#plt.imshow(img)
+'''
+Convolução com mascara lida por arquivo
+'''
+conv_mask = convolution(img,m,n,mask)
+plt.imshow(conv_mask)
+
+plt.imshow(img)
