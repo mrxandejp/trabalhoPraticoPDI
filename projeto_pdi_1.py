@@ -56,16 +56,23 @@ def from_rgb_to_yiq(photo):
       
   return yiq
 
+
 def from_yiq_to_rgb(photo):
-  shape = photo.shape
-  rgb = np.zeros(photo.shape, dtype = int)
-  for i in range(0,shape[0]): 
-    for j in range(0,shape[1]):
-      rgb[i,j,0] = min((1.000*photo[i,j,0] + 0.956*photo[i,j,1] + 0.621*photo[i,j,2]),255)
-      rgb[i,j,1] = min((1.000*photo[i,j,0] - 0.272*photo[i,j,1] - 0.647*photo[i,j,2]),255)
-      rgb[i,j,2] = min((1.000*photo[i,j,0] - 1.106*photo[i,j,1] + 1.703*photo[i,j,2]),255)
-      
-  return rgb
+    shape = photo.shape
+    rgb = np.zeros(photo.shape, dtype = int)
+    for i in range(0,shape[0]): 
+        for j in range(0,shape[1]):
+            rgb[i,j,0] = (1.000*photo[i,j,0] + 0.956*photo[i,j,1] + 0.621*photo[i,j,2])
+            rgb[i,j,1] = (1.000*photo[i,j,0] - 0.272*photo[i,j,1] - 0.647*photo[i,j,2])
+            rgb[i,j,2] = (1.000*photo[i,j,0] - 1.106*photo[i,j,1] + 1.703*photo[i,j,2])
+            for c in range(0,3):
+                if(rgb[i,j,c]<0):
+                    rgb[i,j,c]=0
+                if(rgb[i,j,c]>255):
+                    rgb[i,j,c]=255
+  
+    return rgb
+
 
 def brightness_level(photo, brightness = 1):
   shape = photo.shape
@@ -182,10 +189,16 @@ MAIN
 
 m, n, mask = mask_from_file("input.txt")
 
-img_original = image.imread('./imagens_trab/2817540617.jpg')
+img_original = image.imread('./imagens_trab/imagem.png')
+
+
 
 img = img_original.copy()
 img
+
+img = img*255
+
+
 
 # Para poder editar a imagem
 img.flags 
@@ -279,4 +292,4 @@ conv_mediana = convolution_median(img,m,n)
 
 plt.imshow(conv_mediana)
 
-plt.imshow(img)
+#plt.imshow(img)
