@@ -26,7 +26,7 @@ FUNÇÕES
 def save_image(opcao, img, image_name):
     save = input("Deseja salvar a imagem? (y/n): ")  
     save_path = './imagens_salvas/'
-    opcoes = {'1': '_original.png', '2': '_yiq.png', 'r' : '_red.png', 
+    opcoes = {'1': '_original.png', '2': '_yiq.png', '2.1':'_rgb.png', 'r' : '_red.png', 
               'g': '_green.png', 'b': '_blue.png', 'n':'_negativo.png', 'nr': '_negativoRed.png',
               'ng': '_negativoGreen.png', 'nb': '_negativoBlue.png',
               'bl' : '_brilho.png','br' : '_brilhoRed.png', 'bg' : '_brilhoGreen.png', 'bb' : '_brilhoBlue.png',
@@ -119,7 +119,7 @@ def menu_convolution(img, image_name):
 def display_rgb(photo, rgb, image_name):
   display_r = np.zeros(photo.shape)
   display_g = np.zeros(photo.shape)
-  display_b = np.zeros(photo.shape)
+  display_b = np.zeros(photo.shape)     
   display_r[:,:,0] = photo[:,:,0]
   display_g[:,:,1] = photo[:,:,1]
   display_b[:,:,2] = photo[:,:,2]
@@ -316,6 +316,7 @@ while True:
         save_image(opcao, img_yiq, image_name)
         img_rgb = from_yiq_to_rgb(img_yiq)
         plt.imshow(img_rgb)
+        save_image('2.1', img_rgb, image_name)
     elif opcao == '3':
         menu_banda_rgb(img, image_name)
     elif opcao == '4':
@@ -329,3 +330,10 @@ while True:
         conv_mediana = convolution_median(img,int(m),int(n))
         plt.imshow(conv_mediana)
         save_image(opcao, conv_mediana, image_name)
+'''
+img_original = image.imread('./imagens_trab/' + '2817540617.jpg')
+img = img_original.copy()
+
+img_rgb = display_rgb(img, 'all', 'teste')
+plt.imshow(img_rgb)
+'''
