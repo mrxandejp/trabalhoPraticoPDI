@@ -31,9 +31,14 @@ def save_image(opcao, img, image_name):
               'ng': '_negativoGreen.png', 'nb': '_negativoBlue.png',
               'bl' : '_brilho.png','br' : '_brilhoRed.png', 'bg' : '_brilhoGreen.png', 'bb' : '_brilhoBlue.png',
               'c':'_convolucao.png', 'm':'_conv_media.png', 'sx':'_conv_sobelX.png', 'sy':'_conv_sobelY.png', '7':'_mediana.png'}
+    cmaps= {'r': 'Reds', 'g':'Greens', 'b':'Blues'}
     if save == 'y':
-        plt.imsave( save_path + image_name + opcoes[opcao], img)
-        return print("Imagem salva com sucesso!")
+        if opcao in ['r', 'b', 'g']:
+            plt.imsave( save_path + image_name + opcoes[opcao], img, cmap=cmaps[opcao])
+            return print("Imagem salva com sucesso!")
+        else:
+            plt.imsave( save_path + image_name + opcoes[opcao], img)
+            return print("Imagem salva com sucesso!")
     elif save == 'n':
         return print("Sem salvar!")
 
@@ -116,13 +121,10 @@ def menu_convolution(img, image_name):
         plt.imshow(conv_sobel_y)
         save_image(op, conv_sobel_y, image_name)
 
-def display_rgb(photo, rgb, image_name):
-  display_r = np.zeros(photo.shape)
-  display_g = np.zeros(photo.shape)
-  display_b = np.zeros(photo.shape)     
-  display_r[:,:,0] = photo[:,:,0]
-  display_g[:,:,1] = photo[:,:,1]
-  display_b[:,:,2] = photo[:,:,2]
+def display_rgb(photo, rgb, image_name):   
+  display_r= photo[:,:,0]
+  display_g = photo[:,:,1]
+  display_b = photo[:,:,2]
   if rgb == 'r':
     plt.imshow(display_r, 'Reds')
     save_image(rgb, display_r, image_name)
@@ -146,6 +148,8 @@ def display_rgb(photo, rgb, image_name):
     plt.subplot(1, 3, 3)
     plt.imshow(display_b, 'Blues')
     save_image('b', display_b, image_name)
+    plt.imsave( 'blue', display_b, cmap='Blues')
+    
 
 def from_rgb_to_yiq(photo):
   shape = photo.shape
@@ -330,10 +334,4 @@ while True:
         conv_mediana = convolution_median(img,int(m),int(n))
         plt.imshow(conv_mediana)
         save_image(opcao, conv_mediana, image_name)
-'''
-img_original = image.imread('./imagens_trab/' + '2817540617.jpg')
-img = img_original.copy()
 
-img_rgb = display_rgb(img, 'all', 'teste')
-plt.imshow(img_rgb)
-'''
